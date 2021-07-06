@@ -1,6 +1,8 @@
 import { ITransactionRepository } from "../ITransactionRepository";
 import { Transaction } from "../../entities/Transaction";
 import { S3 } from 'aws-sdk';
+import { createInterface }  from 'readline';
+import { writeFileSync, createReadStream } from 'fs';
 
 export class S3TransactionRespository implements ITransactionRepository {
 
@@ -16,7 +18,15 @@ export class S3TransactionRespository implements ITransactionRepository {
 
     let response = await this.s3.getObject(params).promise();
     let string =  response.Body.toString('utf-8');
-    console.log(string);
+    writeFileSync("tmp", response.Body.toString());
+    let stream = createReadStream("tmp");
+    let reader = createInterface({ input: stream});
+    for await (const line of reader) {
+      console.log(line);
+      console.log("--------------------------------");
+    }
+
+
     let credit = new Transaction({
        value: 10000,
        debenture : "122323",    
